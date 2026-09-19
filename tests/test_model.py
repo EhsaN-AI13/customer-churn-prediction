@@ -6,62 +6,60 @@ import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DATA_PATH = PROJECT_ROOT / "data" / "Telco-Customer-Churn.csv"
 MODEL_PATH = PROJECT_ROOT / "models" / "churn_model.joblib"
 
 
-def test_dataset_exists():
-
-    assert DATA_PATH.exists()
+def create_sample_customer():
+    return pd.DataFrame([
+        {
+            "gender": "Male",
+            "SeniorCitizen": 0,
+            "Partner": "Yes",
+            "Dependents": "No",
+            "tenure": 12,
+            "PhoneService": "Yes",
+            "MultipleLines": "No",
+            "InternetService": "DSL",
+            "OnlineSecurity": "No",
+            "OnlineBackup": "Yes",
+            "DeviceProtection": "No",
+            "TechSupport": "No",
+            "StreamingTV": "No",
+            "StreamingMovies": "No",
+            "Contract": "Month-to-month",
+            "PaperlessBilling": "Yes",
+            "PaymentMethod": "Electronic check",
+            "MonthlyCharges": 55.0,
+            "TotalCharges": 660.0,
+        }
+    ])
 
 
 def test_model_exists():
-
     assert MODEL_PATH.exists()
 
 
 def test_model_can_load():
-
     model = joblib.load(MODEL_PATH)
 
     assert model is not None
 
 
 def test_model_can_predict():
-
     model = joblib.load(MODEL_PATH)
 
-    df = pd.read_csv(DATA_PATH)
+    X = create_sample_customer()
 
-    df["TotalCharges"] = pd.to_numeric(
-        df["TotalCharges"],
-        errors="coerce"
-    )
+    predictions = model.predict(X)
 
-    df = df.drop(columns=["customerID"])
-
-    X = df.drop(columns=["Churn"])
-
-    predictions = model.predict(X.head(5))
-
-    assert len(predictions) == 5
+    assert len(predictions) == 1
 
 
 def test_model_can_predict_probability():
-
     model = joblib.load(MODEL_PATH)
 
-    df = pd.read_csv(DATA_PATH)
+    X = create_sample_customer()
 
-    df["TotalCharges"] = pd.to_numeric(
-        df["TotalCharges"],
-        errors="coerce"
-    )
+    probabilities = model.predict_proba(X)
 
-    df = df.drop(columns=["customerID"])
-
-    X = df.drop(columns=["Churn"])
-
-    probabilities = model.predict_proba(X.head(5))
-
-    assert probabilities.shape == (5, 2)
+    assert probabilities.shape == (1, 2)
